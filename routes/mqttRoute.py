@@ -1,7 +1,7 @@
 from mqtt.mqttRouter import MQTTRouter
 from controllers.mqttController import (
-    registerMqtt,
-    endnodeMqtt,
+    gatewayRegisterMqtt,
+    endnodeListMqtt,
     endnodeRegisterMqtt,
     ackMqtt,
 )
@@ -9,10 +9,10 @@ from controllers.mqttController import (
 router = MQTTRouter()
 
 # 1) iot/register
-router.add("iot/register", registerMqtt)
+router.add("iot/register", gatewayRegisterMqtt)
 
 # 2) iot/+/endNode
-router.add("iot/+/endNode", endnodeMqtt)
+router.add("iot/+/endNode", endnodeListMqtt)
 
 # 3) iot/+/endNode/register
 router.add("iot/+/endNode/register", endnodeRegisterMqtt)
