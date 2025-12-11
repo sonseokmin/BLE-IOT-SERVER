@@ -1,6 +1,3 @@
-
-
-
 # /remote 요청
 def remotePost(payload: None):
     return {"status": 200, "mode": "remote"}

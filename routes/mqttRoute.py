@@ -1,4 +1,3 @@
-
 from mqtt.mqttRouter import MQTTRouter
 from controllers.mqttController import (
     registerMqtt,
