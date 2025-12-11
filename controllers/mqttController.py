@@ -1,5 +1,8 @@
+import base64
 from models import mqttModel
 import json
+
+from routes.websocketRoute import broadcast_mqtt_response
 
 
 async def gatewayRegisterMqtt(client, topic, payload, qos, properties):
@@ -14,7 +17,9 @@ async def gatewayRegisterMqtt(client, topic, payload, qos, properties):
             return
 
         print(f"[2] {serial} register ACK 전송")
-        client.publish(f"iot/{serial}/register/ack", json.dumps({"rpi_serial": serial}))
+        client.publish(
+            f"iot/{serial}/register/ack", json.dumps({"rpi_serial": serial}), qos=0
+        )
 
     except Exception as e:
         print(e)
@@ -31,7 +36,11 @@ async def endnodeListMqtt(client, topic, payload, qos, properties):
             return
 
         print(f"[2] {serial} endNode ACK 전송")
-        client.publish(f"iot/{serial}/endNode/ack", json.dumps({"endNodes": res}))
+        client.publish(
+            f"iot/{serial}/endNode/ack",
+            json.dumps(res),
+            qos=0,
+        )
 
     except Exception as e:
         print(e)
@@ -44,7 +53,7 @@ async def endnodeRegisterMqtt(client, topic, payload, qos, properties):
         serial = topic.split("/")[1]
 
         data = json.loads(payload.decode())
-        endNode = data["endNode"]
+        endNode = base64.b64decode(data["endNode"])
 
         res = await mqttModel.endNodeRegister(serial, endNode)
 
@@ -52,7 +61,9 @@ async def endnodeRegisterMqtt(client, topic, payload, qos, properties):
             return
 
         print(f"[2] {serial} {endNode} endNodeRegister ACK 전송")
-        client.publish(f"iot/{serial}/endNode/register/ack", json.dumps({"res": "ok"}))
+        client.publish(
+            f"iot/{serial}/endNode/register/ack", json.dumps({"res": "ok"}), qos=0
+        )
 
     except Exception as e:
         print(e)
@@ -60,5 +71,28 @@ async def endnodeRegisterMqtt(client, topic, payload, qos, properties):
 
 
 async def ackMqtt(client, topic, payload, qos, properties):
-    node = topic.split("/")[1]
-    print(f"[MQTT] act/ack ({node}) →", payload.decode())
+    print(f"[1] {topic} 요청 수신")
+
+    try:
+        # 1. 토픽에서 시리얼 번호 추출 (iot/1234/act/ack -> 1234)
+        serial = topic.split("/")[1]
+
+        # 2. Payload 디코딩 (Bytes -> JSON)
+        decoded_payload = json.loads(payload.decode())
+
+        print(f"    ㄴ 데이터: {decoded_payload}")
+
+        # 3. ★ 웹소켓으로 응답 전송 ★
+        # "누가(serial)"에게 보낼지 인자로 꼭 넣어줘야 합니다!
+        response_data = {
+            "type": "ACK",
+            "res": decoded_payload.get("res", "No Content"),
+            "serial": serial,
+        }
+
+        await broadcast_mqtt_response(serial, response_data)
+        print(f"[2] 웹소켓 전송 완료 -> {serial}")
+
+    except Exception as e:
+        print(f"🚨 에러 발생: {e}")
+        return

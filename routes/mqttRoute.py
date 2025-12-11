@@ -19,3 +19,6 @@ router.add("iot/+/endNode/register", endnodeRegisterMqtt)
 
 # 4) iot/+/endNode/act/ack
 router.add("iot/+/endNode/act/ack", ackMqtt)
+
+# 5) iot/+/endNode/react/ack
+# router.add()

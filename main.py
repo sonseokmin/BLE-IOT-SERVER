@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from mqtt.mqttClient import mqtt
-from routes import httpRoute, mqttRoute
+from routes import httpRoute, mqttRoute, websocketRoute
 from contextlib import asynccontextmanager
 from database.database import db
 
@@ -37,3 +37,4 @@ app = FastAPI(lifespan=lifespan)
 mqtt.init_app(app)
 
 app.include_router(httpRoute.router)
+app.include_router(websocketRoute.router)
