@@ -52,11 +52,20 @@ async def remotePost(payload: RequestModel):
             + cipherValue["tag"]
         )
 
-        mqtt.client.publish(
-            f"iot/{serial}/endNode/act",
-            json.dumps({"target": endNode, "msg": result}),
-            qos=0,
-        )
+        print(result)
+
+        if cmdCategory == 0:
+            mqtt.client.publish(
+                f"iot/{serial}/endNode/act",
+                json.dumps({"target": endNode, "msg": result}),
+                qos=0,
+            )
+        else:
+            mqtt.client.publish(
+                f"iot/{serial}/endNode/react",
+                json.dumps({"target": endNode, "msg": result}),
+                qos=0,
+            )
 
     except Exception as e:
         print(e)

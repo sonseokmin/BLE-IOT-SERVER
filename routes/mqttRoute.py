@@ -4,6 +4,7 @@ from controllers.mqttController import (
     endnodeListMqtt,
     endnodeRegisterMqtt,
     ackMqtt,
+    reactMqtt,
 )
 
 router = MQTTRouter()
@@ -21,4 +22,4 @@ router.add("iot/+/endNode/register", endnodeRegisterMqtt)
 router.add("iot/+/endNode/act/ack", ackMqtt)
 
 # 5) iot/+/endNode/react/ack
-# router.add()
+router.add("iot/+/endNode/react/ack", reactMqtt)

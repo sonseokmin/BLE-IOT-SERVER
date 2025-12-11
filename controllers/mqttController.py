@@ -1,7 +1,7 @@
 import base64
 from models import mqttModel
 import json
-
+from services.sevice import decrypt
 from routes.websocketRoute import broadcast_mqtt_response
 
 
@@ -80,8 +80,6 @@ async def ackMqtt(client, topic, payload, qos, properties):
         # 2. Payload 디코딩 (Bytes -> JSON)
         decoded_payload = json.loads(payload.decode())
 
-        print(f"    ㄴ 데이터: {decoded_payload}")
-
         # 3. ★ 웹소켓으로 응답 전송 ★
         # "누가(serial)"에게 보낼지 인자로 꼭 넣어줘야 합니다!
         response_data = {
@@ -89,6 +87,39 @@ async def ackMqtt(client, topic, payload, qos, properties):
             "res": decoded_payload.get("res", "No Content"),
             "serial": serial,
         }
+
+        await broadcast_mqtt_response(serial, response_data)
+        print(f"[2] 웹소켓 전송 완료 -> {serial}")
+
+    except Exception as e:
+        print(f"🚨 에러 발생: {e}")
+        return
+
+
+async def reactMqtt(client, topic, payload, qos, properties):
+    print(f"[1] {topic} 요청 수신")
+
+    try:
+        # 1. 토픽에서 시리얼 번호 추출 (iot/1234/act/ack -> 1234)
+        serial = topic.split("/")[1]
+        # 2. Payload 디코딩 (Bytes -> JSON)
+        data = json.loads(payload.decode())
+
+        msg = base64.b64decode(data["msg"])
+        endNode = data["target"]
+        # 3. ★ 웹소켓으로 응답 전송 ★
+        # "누가(serial)"에게 보낼지 인자로 꼭 넣어줘야 합니다!
+
+        print(msg, endNode)
+        res = await mqttModel.getPsk(endNode)
+        psk = res["data"]["psk"]
+
+        result = decrypt(msg, psk)["plaintext"]
+
+        parameter = int.from_bytes(result[6:10], "big")
+        print(parameter)
+
+        response_data = {"endNode": endNode, "parameter": parameter}
 
         await broadcast_mqtt_response(serial, response_data)
         print(f"[2] 웹소켓 전송 완료 -> {serial}")

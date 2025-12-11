@@ -71,3 +71,19 @@ async def endNodeRegister(serial: str, endNode: str):
         # 등록 실패
         print(f"[DB 에러] 저장 실패: {e}")
         return {"status": "FAIL"}
+
+
+async def getPsk(endNode: str):
+    SQL = """
+    SELECT psk
+    FROM enddevice
+    WHERE id = :id
+    """
+
+    try:
+        res = await db.fetch_one(query=SQL, values={"id": endNode})
+        return {"status": "OK", "data": dict(res)}
+
+    except Exception as e:
+        print(e)
+        return {"status": "FAIL"}
