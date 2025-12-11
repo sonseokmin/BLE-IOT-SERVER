@@ -39,7 +39,7 @@ async def endNodeList(serial: str):
         # 등록 성공시
         print(f"[DB 조회] {serial}")
         endnode_ids = [list(row.values())[0] for row in res]
-        return {"status": "OK", "data": endnode_ids}
+        return {"status": "OK", "endNodes": endnode_ids}
 
     except Exception as e:
         # 등록 실패
