@@ -94,7 +94,7 @@ async def getPsk(endNode: str):
         query_id = endNode
 
     try:
-        res = await db.fetch_one(query=SQL, values={"id": endNode})
+        res = await db.fetch_one(query=SQL, values={"id": query_id})
         return {"status": "OK", "data": dict(res)}
 
     except Exception as e:
