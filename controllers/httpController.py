@@ -78,5 +78,60 @@ async def remotePost(payload: RequestModel):
 
 
 # /direct 요청
-def directPost(payload: None):
-    return {"status": 200, "mode": "direct"}
+async def directPost(payload: RequestModel):
+    endNode = payload.endNode
+    cmdCategory = payload.cmdCategory
+    cmdType = payload.cmdType
+    parameter = payload.parameter
+
+    print(
+        "endNode =",
+        endNode,
+        "cmdCategory =",
+        cmdCategory,
+        "cmdType =",
+        cmdType,
+        "parameter =",
+        parameter,
+    )
+
+    if endNode is None or cmdCategory is None or cmdType is None or parameter is None:
+        return {"status": 400, "msg": "Bad Request"}
+
+    try:
+        res = await httpModel.getEndDevice(endNode)
+        data = res["data"]
+
+        # hex 코드 변환 로직
+        req_count = data["req_count"].to_bytes(4, byteorder="big")
+        cmdCategory = cmdCategory.to_bytes(1, byteorder="big")
+        cmdType = cmdType.to_bytes(1, byteorder="big")
+        parameter = parameter.to_bytes(4, byteorder="big")
+
+        psk = data["psk"]
+        macAddress = data["mac_address"]
+
+        plainText = req_count + cmdCategory + cmdType + parameter
+
+        print(plainText)
+
+        cipherValue = encrypt(plainText, psk)
+
+        result = (
+            b"\x11\xff"
+            + macAddress
+            + cipherValue["nonce"]
+            + cipherValue["ciphertext"]
+            + cipherValue["tag"]
+        )
+
+        await httpModel.updateReqCount(endNode)
+
+        return {
+            "status": 200,
+            "target": endNode,
+            "msg": base64.b64encode(result).decode("utf-8"),
+        }
+
+    except Exception as e:
+        print(e)
