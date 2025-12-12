@@ -58,7 +58,10 @@ async def remotePost(payload: RequestModel):
             mqtt.client.publish(
                 f"iot/{serial}/endNode/act",
                 json.dumps(
-                    {"target": endNode, "msg": base64.b64encode(result).decode("utf-8")}
+                    {
+                        "target": base64.b64encode(macAddress).decode("utf-8"),
+                        "msg": base64.b64encode(result).decode("utf-8"),
+                    }
                 ),
                 qos=0,
             )
@@ -66,7 +69,10 @@ async def remotePost(payload: RequestModel):
             mqtt.client.publish(
                 f"iot/{serial}/endNode/react",
                 json.dumps(
-                    {"target": endNode, "msg": base64.b64encode(result).decode("utf-8")}
+                    {
+                        "target": base64.b64encode(macAddress),
+                        "msg": base64.b64encode(result).decode("utf-8"),
+                    }
                 ),
                 qos=0,
             )
