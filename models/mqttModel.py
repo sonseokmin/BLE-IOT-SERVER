@@ -84,8 +84,14 @@ async def getPsk(endNode: str):
     SQL = """
     SELECT psk, res_count
     FROM enddevice
-    WHERE mac_address = :id
+    WHERE mac_address = UNHEX(:id)
     """
+
+    if isinstance(endNode, bytes):
+        query_id = endNode.hex()
+    else:
+        # 이미 문자열(Hex String)이라면 그대로 사용
+        query_id = endNode
 
     try:
         res = await db.fetch_one(query=SQL, values={"id": endNode})
