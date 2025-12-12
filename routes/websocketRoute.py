@@ -48,6 +48,12 @@ manager = ConnectionManager()
 @router.websocket("/ws/{serial}")
 async def websocket_endpoint(websocket: WebSocket, serial: str):
     await manager.connect(websocket, serial)
+
+    try:
+        await websocket.send_text("CONNECTED_CONFIRMED")
+    except:
+        pass
+
     try:
         while True:
             # 연결 유지를 위해 대기 (클라이언트 메시지 수신용)
