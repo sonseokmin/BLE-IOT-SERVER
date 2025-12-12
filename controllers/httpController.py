@@ -32,20 +32,12 @@ async def remotePost(payload: RequestModel):
         data = res["data"]
 
         # hex 코드 변환 로직
-        req_count = data["req_count"].to_bytes(4, byteorder="little")
-        cmdCategory = cmdCategory.to_bytes(1, byteorder="little")
-        cmdType = cmdType.to_bytes(1, byteorder="little")
-        parameter = parameter.to_bytes(4, byteorder="little")
-
+        req_count = data["req_count"]
         psk = data["psk"]
         serial = data["serial_number"]
         macAddress = data["mac_address"]
 
-        plainText = req_count + cmdCategory + cmdType + parameter
-
-        print(plainText)
-
-        cipherValue = encrypt(plainText, psk)
+        cipherValue = encrypt(psk, req_count, cmdCategory, cmdType, parameter)
 
         result = (
             b"\x1e\xff\x11\xff"

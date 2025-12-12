@@ -1,17 +1,29 @@
 import os
+import struct
 from Crypto.Cipher import AES
 
 
-def encrypt(plaintext, psk):
-
+def encrypt(key, req_count, cmdCategory, cmdType, parameter):
     nonce = os.urandom(7)
 
-    cipher = AES.new(psk, AES.MODE_GCM, nonce=nonce, mac_len=6)
+    # [핵심 변경counter] 10바이트 구조체 생성 (Little Endian)
+    # Counter(4) + Cat(1) + Type(1) + Param(4) = 10 Bytes
+    # '<I B B I' 형식 문자열 의미:
+    # < : Little Endian
+    # I : unsigned int (4 bytes)
+    # B : unsigned char (1 byte)
+    plain_data = struct.pack("<I B B I", req_count, cmdCategory, cmdType, parameter)
 
-    ciphertext, tag = cipher.encrypt_and_digest(plaintext)
+    print(f"[*] Payload Hex: {plain_data.hex()}")
 
-    print("Ciphertext :", ciphertext.hex(), "len =", len(ciphertext))  # 10B
-    print("Auth Tag   :", tag[:6].hex(), "len =", 6)
+    cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
+    ciphertext, full_tag = cipher.encrypt_and_digest(plain_data)
+    tag = full_tag[:6]
+
+    print("counter", req_count)
+    print("nonce", nonce)
+    print("ciphertext", ciphertext)
+    print("nonctage", tag)
 
     return {"ciphertext": ciphertext, "tag": tag, "nonce": nonce}
 

@@ -126,8 +126,8 @@ async def reactMqtt(client, topic, payload, qos, properties):
 
         result = decrypt(msg, psk)["plaintext"]
 
-        counter = int.from_bytes(result[0:4], "big")
-        parameter = int.from_bytes(result[6:10], "big")
+        counter = int.from_bytes(result[0:4], "little")
+        parameter = int.from_bytes(result[6:10], "little")
 
         print(res_count, counter, parameter)
 
