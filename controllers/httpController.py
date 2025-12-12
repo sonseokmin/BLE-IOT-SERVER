@@ -30,6 +30,7 @@ async def remotePost(payload: RequestModel):
     try:
         res = await httpModel.getEndDevice(endNode)
         data = res["data"]
+        print(res)
 
         # hex 코드 변환 로직
         req_count = data["req_count"]
@@ -109,20 +110,15 @@ async def directPost(payload: RequestModel):
         res = await httpModel.getEndDevice(endNode)
         data = res["data"]
 
-        # hex 코드 변환 로직
-        req_count = data["req_count"].to_bytes(4, byteorder="little")
-        cmdCategory = cmdCategory.to_bytes(1, byteorder="little")
-        cmdType = cmdType.to_bytes(1, byteorder="little")
-        parameter = parameter.to_bytes(4, byteorder="little")
-
         psk = data["psk"]
         macAddress = data["mac_address"]
 
-        plainText = req_count + cmdCategory + cmdType + parameter
+        # hex 코드 변환 로직
+        req_count = data["req_count"]
+        psk = data["psk"]
+        macAddress = data["mac_address"]
 
-        print(plainText)
-
-        cipherValue = encrypt(plainText, psk)
+        cipherValue = encrypt(psk, req_count, cmdCategory, cmdType, parameter)
 
         result = (
             b"\x1e\xff\x11\xff"
