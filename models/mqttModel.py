@@ -29,9 +29,16 @@ async def gatewayRegister(serial: str):
 
 async def endNodeList(serial: str):
     SQL = """
-    SELECT enddevice_id
-    FROM gre JOIN gateway ON (gre.gateway_id = gateway.id)
-    WHERE serial_number = :serial
+    SELECT
+    enddevice.mac_address
+    FROM
+        gre
+    JOIN
+        gateway ON (gre.gateway_id = gateway.id)
+    JOIN
+        enddevice ON (gre.enddevice_id = enddevice.id) -- enddevice 테이블 조인
+    WHERE
+        gateway.serial_number = :serial;
     """
 
     try:

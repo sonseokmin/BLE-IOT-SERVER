@@ -35,7 +35,14 @@ async def endnodeListMqtt(client, topic, payload, qos, properties):
         if res["status"] == "FAIL":
             return
 
+        tmp = []
+        for i in res["endNodes"]:
+            tmp.append(base64.b64encode(i).decode("utf-8"))
+
+        res["endNodes"] = tmp[:]
+        print("LIST = ", res)
         print(f"[2] {serial} endNode ACK 전송")
+
         client.publish(
             f"iot/{serial}/endNode/ack",
             json.dumps(res),
