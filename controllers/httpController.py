@@ -60,7 +60,7 @@ async def remotePost(payload: RequestModel):
                 json.dumps(
                     {
                         "target": base64.b64encode(macAddress).decode("utf-8"),
-                        "msg": base64.b64encode(result).decode("utf-8"),
+                        "msg": f"1eff{base64.b64encode(result).decode("utf-8")}",
                     }
                 ),
                 qos=0,
@@ -71,7 +71,7 @@ async def remotePost(payload: RequestModel):
                 json.dumps(
                     {
                         "target": base64.b64encode(macAddress),
-                        "msg": base64.b64encode(result).decode("utf-8"),
+                        "msg": f"1eff{base64.b64encode(result).decode("utf-8")}",
                     }
                 ),
                 qos=0,
