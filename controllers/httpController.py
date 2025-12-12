@@ -32,10 +32,10 @@ async def remotePost(payload: RequestModel):
         data = res["data"]
 
         # hex 코드 변환 로직
-        req_count = data["req_count"].to_bytes(4, byteorder="big")
-        cmdCategory = cmdCategory.to_bytes(1, byteorder="big")
-        cmdType = cmdType.to_bytes(1, byteorder="big")
-        parameter = parameter.to_bytes(4, byteorder="big")
+        req_count = data["req_count"].to_bytes(4, byteorder="little")
+        cmdCategory = cmdCategory.to_bytes(1, byteorder="little")
+        cmdType = cmdType.to_bytes(1, byteorder="little")
+        parameter = parameter.to_bytes(4, byteorder="little")
 
         psk = data["psk"]
         serial = data["serial_number"]
@@ -70,7 +70,7 @@ async def remotePost(payload: RequestModel):
                 f"iot/{serial}/endNode/react",
                 json.dumps(
                     {
-                        "target": base64.b64encode(macAddress),
+                        "target": base64.b64encode(macAddress).decode("utf-8"),
                         "msg": base64.b64encode(result).decode("utf-8"),
                     }
                 ),
@@ -109,10 +109,10 @@ async def directPost(payload: RequestModel):
         data = res["data"]
 
         # hex 코드 변환 로직
-        req_count = data["req_count"].to_bytes(4, byteorder="big")
-        cmdCategory = cmdCategory.to_bytes(1, byteorder="big")
-        cmdType = cmdType.to_bytes(1, byteorder="big")
-        parameter = parameter.to_bytes(4, byteorder="big")
+        req_count = data["req_count"].to_bytes(4, byteorder="little")
+        cmdCategory = cmdCategory.to_bytes(1, byteorder="little")
+        cmdType = cmdType.to_bytes(1, byteorder="little")
+        parameter = parameter.to_bytes(4, byteorder="little")
 
         psk = data["psk"]
         macAddress = data["mac_address"]
