@@ -48,19 +48,19 @@ async def remotePost(payload: RequestModel):
         cipherValue = encrypt(plainText, psk)
 
         result = (
-            b"\x11\xff"
+            b"\x1e\xff\x11\xff"
             + macAddress
             + cipherValue["nonce"]
             + cipherValue["ciphertext"]
             + cipherValue["tag"]
         )
-        if tmp == 0:
+        if tmp == 1:
             mqtt.client.publish(
                 f"iot/{serial}/endNode/act",
                 json.dumps(
                     {
                         "target": base64.b64encode(macAddress).decode("utf-8"),
-                        "msg": f"1eff{base64.b64encode(result).decode("utf-8")}",
+                        "msg": base64.b64encode(result).decode("utf-8"),
                     }
                 ),
                 qos=0,
@@ -71,7 +71,7 @@ async def remotePost(payload: RequestModel):
                 json.dumps(
                     {
                         "target": base64.b64encode(macAddress),
-                        "msg": f"1eff{base64.b64encode(result).decode("utf-8")}",
+                        "msg": base64.b64encode(result).decode("utf-8"),
                     }
                 ),
                 qos=0,
