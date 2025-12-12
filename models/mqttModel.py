@@ -75,7 +75,7 @@ async def endNodeRegister(serial: str, endNode: str):
 
 async def getPsk(endNode: str):
     SQL = """
-    SELECT psk
+    SELECT psk, res_count
     FROM enddevice
     WHERE id = :id
     """
@@ -83,6 +83,23 @@ async def getPsk(endNode: str):
     try:
         res = await db.fetch_one(query=SQL, values={"id": endNode})
         return {"status": "OK", "data": dict(res)}
+
+    except Exception as e:
+        print(e)
+        return {"status": "FAIL"}
+
+
+async def updateReqCount(endNode: str, counter: int):
+    SQL = """
+    UPDATE enddevice
+    SET res_count = :counter + 1
+    WHERE id = :id
+    """
+
+    try:
+        res = await db.execute(query=SQL, values={"counter": counter, "id": endNode})
+
+        return {"status": "OK"}
 
     except Exception as e:
         print(e)

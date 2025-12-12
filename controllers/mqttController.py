@@ -112,17 +112,28 @@ async def reactMqtt(client, topic, payload, qos, properties):
 
         print(msg, endNode)
         res = await mqttModel.getPsk(endNode)
-        psk = res["data"]["psk"]
+
+        data = res["data"]
+        psk = data["psk"]
+        res_count = data["res_count"]
 
         result = decrypt(msg, psk)["plaintext"]
 
+        counter = int.from_bytes(result[0:4], "big")
         parameter = int.from_bytes(result[6:10], "big")
-        print(parameter)
+
+        print(res_count, counter, parameter)
+
+        if res_count > counter:
+            print(f"[!] 폐기")
+            return
 
         response_data = {"endNode": endNode, "parameter": parameter}
 
         await broadcast_mqtt_response(serial, response_data)
         print(f"[2] 웹소켓 전송 완료 -> {serial}")
+
+        await mqttModel.updateReqCount(endNode, counter)
 
     except Exception as e:
         print(f"🚨 에러 발생: {e}")

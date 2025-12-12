@@ -18,3 +18,22 @@ async def getEndDevice(endNode: str):
     except Exception as e:
         print(e)
         return {"status": "FAIL"}
+
+
+async def updateReqCount(
+    endNode: str,
+):
+    SQL = """
+    UPDATE enddevice
+    SET req_count = req_count + 1
+    WHERE id = :id
+    """
+
+    try:
+        res = await db.execute(query=SQL, values={"id": endNode})
+
+        return {"status": "OK"}
+
+    except Exception as e:
+        print(e)
+        return {"status": "FAIL"}

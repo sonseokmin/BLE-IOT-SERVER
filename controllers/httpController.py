@@ -1,3 +1,4 @@
+import base64
 import json
 from models import httpModel
 from schemas.schema import RequestModel
@@ -11,7 +12,7 @@ async def remotePost(payload: RequestModel):
     cmdCategory = payload.cmdCategory
     cmdType = payload.cmdType
     parameter = payload.parameter
-
+    tmp = cmdCategory
     print(
         "endNode =",
         endNode,
@@ -23,7 +24,7 @@ async def remotePost(payload: RequestModel):
         parameter,
     )
 
-    if not endNode or not cmdCategory or not cmdType or not parameter:
+    if endNode is None or cmdCategory is None or cmdType is None or parameter is None:
         return {"status": 400, "msg": "Bad Request"}
 
     try:
@@ -42,6 +43,8 @@ async def remotePost(payload: RequestModel):
 
         plainText = req_count + cmdCategory + cmdType + parameter
 
+        print(plainText)
+
         cipherValue = encrypt(plainText, psk)
 
         result = (
@@ -51,21 +54,24 @@ async def remotePost(payload: RequestModel):
             + cipherValue["ciphertext"]
             + cipherValue["tag"]
         )
-
-        print(result)
-
-        if cmdCategory == 0:
+        if tmp == 0:
             mqtt.client.publish(
                 f"iot/{serial}/endNode/act",
-                json.dumps({"target": endNode, "msg": result}),
+                json.dumps(
+                    {"target": endNode, "msg": base64.b64encode(result).decode("utf-8")}
+                ),
                 qos=0,
             )
         else:
             mqtt.client.publish(
                 f"iot/{serial}/endNode/react",
-                json.dumps({"target": endNode, "msg": result}),
+                json.dumps(
+                    {"target": endNode, "msg": base64.b64encode(result).decode("utf-8")}
+                ),
                 qos=0,
             )
+
+        await httpModel.updateReqCount(endNode)
 
     except Exception as e:
         print(e)
