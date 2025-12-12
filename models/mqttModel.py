@@ -80,25 +80,44 @@ async def endNodeRegister(serial: str, endNode: str):
         return {"status": "FAIL"}
 
 
-async def getPsk(endNode: str):
+async def getPsk(endNode):
+    # 1. SQL: 파이썬에서 받은 '문자열'을 UNHEX로 풀어서 비교
+    # (주의: :id 앞뒤로 따옴표 붙이지 마세요. 그냥 :id 입니다)
     SQL = """
     SELECT psk, res_count
     FROM enddevice
     WHERE mac_address = UNHEX(:id)
     """
 
-    if isinstance(endNode, bytes):
-        query_id = endNode.hex()
-    else:
-        # 이미 문자열(Hex String)이라면 그대로 사용
-        query_id = endNode
-
     try:
+        # 2. Python 데이터 처리: 무조건 '순수 문자열(Hex String)'로 만듦
+        if isinstance(endNode, bytes):
+            # 바이트(b'\x07...')가 들어오면 -> "071d..." 문자열로 변환
+            query_id = endNode.hex()
+        elif isinstance(endNode, str):
+            # 이미 문자열이면 그대로 사용, 단 '0x' 접두어가 있다면 제거 등의 처리 가능
+            # 여기서는 순수 hex string("071d8512")이라고 가정
+            query_id = endNode
+        else:
+            print(f"🚨 [getPsk] 타입 에러: {type(endNode)}는 처리할 수 없습니다.")
+            return {"status": "FAIL"}
+
+        # 3. 확인용 로그 (제대로 변환됐는지 확인)
+        # 출력값이 b'...'가 아니라 "071d8512" 처럼 따옴표 안의 문자열이어야 함
+        print(f"DEBUG: SQL 실행 -> UNHEX('{query_id}')")
+
+        # 4. 쿼리 실행
         res = await db.fetch_one(query=SQL, values={"id": query_id})
+
+        # 5. 결과 없음 처리
+        if res is None:
+            print(f"❌ [getPsk] DB 데이터 없음 (Target: {query_id})")
+            return {"status": "FAIL"}
+
         return {"status": "OK", "data": dict(res)}
 
     except Exception as e:
-        print(e)
+        print(f"🚨 [getPsk] 최종 에러: {e}")
         return {"status": "FAIL"}
 
 
