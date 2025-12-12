@@ -47,7 +47,14 @@ async def remotePost(payload: RequestModel):
             + cipherValue["tag"]
         )
 
-        print("result", result)
+        print("mac_address = ", macAddress, len(macAddress))
+        print("nonce = ", cipherValue["nonce"], len(cipherValue["nonce"]))
+        print(
+            "ciphertext = ", cipherValue["ciphertext"], len(cipherValue["ciphertext"])
+        )
+        print("tag = ", cipherValue["tag"], len(cipherValue["tag"]))
+        print("result = ", result, len(result))
+
         if tmp == 1:
             mqtt.client.publish(
                 f"iot/{serial}/endNode/act",

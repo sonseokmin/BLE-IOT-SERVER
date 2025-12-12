@@ -124,10 +124,20 @@ async def reactMqtt(client, topic, payload, qos, properties):
         psk = data["psk"]
         res_count = data["res_count"]
 
-        result = decrypt(msg, psk)["plaintext"]
+        # 3. 7바이트: [6:13] (인덱스 6부터 13 미만까지)
+        nonce = msg[8:15]
 
-        counter = int.from_bytes(result[0:4], "little")
-        parameter = int.from_bytes(result[6:10], "little")
+        # 4. 10바이트: [13:23] (인덱스 13부터 23 미만까지)
+        ciphertext = msg[15:25]
+        # 참고: 이 영역에 ASCII 문자 '16&8'이 포함되어 있습니다.
+
+        # 5. 2바이트: [23:25] (인덱스 23부터 25 미만까지)
+        tag = msg[25:]
+
+        result = decrypt(psk, nonce, ciphertext, tag)
+
+        counter = result["count"]
+        parameter = result["parameter"]
 
         print(res_count, counter, parameter)
 
