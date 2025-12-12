@@ -54,6 +54,8 @@ async def remotePost(payload: RequestModel):
             + cipherValue["ciphertext"]
             + cipherValue["tag"]
         )
+
+        print("result", result)
         if tmp == 1:
             mqtt.client.publish(
                 f"iot/{serial}/endNode/act",
@@ -124,7 +126,7 @@ async def directPost(payload: RequestModel):
         cipherValue = encrypt(plainText, psk)
 
         result = (
-            b"\x11\xff"
+            b"\x1e\xff\x11\xff"
             + macAddress
             + cipherValue["nonce"]
             + cipherValue["ciphertext"]
