@@ -113,7 +113,7 @@ async def reactMqtt(client, topic, payload, qos, properties):
         data = json.loads(payload.decode())
 
         msg = base64.b64decode(data["msg"])
-        endNode = base64.b64decode(data["target"])
+        endNode = base64.b64decode(data["target"]).hex()
 
         print("endNode", endNode)
         # 3. ★ 웹소켓으로 응답 전송 ★
