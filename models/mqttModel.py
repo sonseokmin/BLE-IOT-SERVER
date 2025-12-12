@@ -84,7 +84,7 @@ async def getPsk(endNode: str):
     SQL = """
     SELECT psk, res_count
     FROM enddevice
-    WHERE id = :id
+    WHERE mac_address = :id
     """
 
     try:
