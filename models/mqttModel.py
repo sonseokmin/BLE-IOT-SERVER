@@ -86,7 +86,7 @@ async def getPsk(endNode):
     SQL = """
     SELECT psk, res_count
     FROM enddevice
-    WHERE mac_address = UNHEX(:id)
+    WHERE mac_address = :id;
     """
 
     try:
@@ -95,12 +95,15 @@ async def getPsk(endNode):
         print(f"DEBUG: SQL 실행 -> {endNode}')")
 
         # 4. 쿼리 실행
-        res = await db.fetch_one(query=SQL, values={"id": endNode})
+        print(type(endNode))
+        res = await db.fetch_one(query=SQL, values={"id": bytes.fromhex(endNode)})
+        #res = await db.fetch_one(query=SQL)
 
         # 5. 결과 없음 처리
         if res is None:
             print(f"❌ [getPsk] DB 데이터 없음 (Target: {endNode})")
             return {"status": "FAIL"}
+        print(dict(res))
 
         return {"status": "OK", "data": dict(res)}
 
@@ -113,7 +116,7 @@ async def updateReqCount(endNode: str, counter: int):
     SQL = """
     UPDATE enddevice
     SET res_count = :counter + 1
-    WHERE id = :id
+    WHERE mac_address = :id
     """
 
     try:
