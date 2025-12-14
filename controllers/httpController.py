@@ -132,7 +132,7 @@ async def directPost(payload: RequestModel):
 
         return {
             "status": 200,
-            "target": endNode,
+            "target": base64.b64encode(macAddress).decode("utf-8"),
             "msg": base64.b64encode(result).decode("utf-8"),
         }
 
