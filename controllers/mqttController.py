@@ -121,25 +121,29 @@ async def reactMqtt(client, topic, payload, qos, properties):
 
         print(msg, endNode)
         res = await mqttModel.getPsk(endNode)
+        print("HELLOW", res)
 
         data = res["data"]
         psk = data["psk"]
         res_count = data["res_count"]
+        print("DEBUG================================")
 
         # 3. 7바이트: [6:13] (인덱스 6부터 13 미만까지)
-        nonce = msg[8:15]
+        nonce = msg[4:11]
 
         # 4. 10바이트: [13:23] (인덱스 13부터 23 미만까지)
-        ciphertext = msg[15:25]
+        ciphertext = msg[11:21]
         # 참고: 이 영역에 ASCII 문자 '16&8'이 포함되어 있습니다.
 
         # 5. 2바이트: [23:25] (인덱스 23부터 25 미만까지)
-        tag = msg[25:]
+        tag = msg[21:]
+        print(f"msg: {msg}\n nonce: {nonce} ciphertext:{ciphertext}tag:{tag}")
 
         result = decrypt(psk, nonce, ciphertext, tag)
 
         counter = result["count"]
         parameter = result["parameter"]
+        print("HELLO WORLD", result)
 
         print(res_count, counter, parameter)
 
@@ -151,8 +155,9 @@ async def reactMqtt(client, topic, payload, qos, properties):
 
         await broadcast_mqtt_response(serial, response_data)
         print(f"[2] 웹소켓 전송 완료 -> {serial}")
-
+        print("HELLO!")
         await mqttModel.updateReqCount(endNode, counter)
+        print("HELLO!222222")
 
     except Exception as e:
         print(f"🚨 에러 발생: {e}")
