@@ -65,6 +65,8 @@ def decrypt(key, nonce, ciphertext, tag):
         # *참고: GCM 표준상 Tag가 짧으면 보안성 낮아짐, 라이브러리에 따라 짧은 태그 거부할 수 있음
         # 여기서는 암호문만 풉니다.
 
+        print(len(ciphertext))
+
         plaintext = cipher.decrypt(ciphertext)
 
         # 구조 풀기: TxCnt(4) + Cat(1) + Type(1) + Data(4)

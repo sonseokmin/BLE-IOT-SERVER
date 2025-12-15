@@ -6,3 +6,8 @@ class RequestModel(BaseModel):
     cmdCategory: int
     cmdType: int
     parameter: int
+
+
+class RequestDecryptModel(BaseModel):
+    target: str
+    msg: str

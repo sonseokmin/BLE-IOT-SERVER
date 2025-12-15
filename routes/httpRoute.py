@@ -9,3 +9,4 @@ router = APIRouter(prefix="/device/control")
 # API 연결
 router.add_api_route("/remote", httpController.remotePost, methods=["POST"])
 router.add_api_route("/direct", httpController.directPost, methods=["POST"])
+router.add_api_route("/decrypt", httpController.decryptPost, methods=["POST"])
